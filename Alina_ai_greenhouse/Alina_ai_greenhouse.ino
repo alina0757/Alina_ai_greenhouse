@@ -1,5 +1,5 @@
 #include <WiFi.h>
-#include <HTTPClient.h>
+//#include <HTTPClient.h>
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
 #include <ESP32_Servo.h>
@@ -18,8 +18,8 @@ CRGB leds[NUM_LEDS];                   // определяем матрицу (F
 #define  wind   16                     // пин вентилятора
 
 const char* api_key = "9f5c5d072d5d97dfde6a0d3c09611077";
-String type = "теплица";
-String plant_name = "кресс салат";
+//String type = "теплица";
+//String plant_name = "кресс салат";
 
 
 // параметры сети
@@ -108,129 +108,129 @@ int* userArray = NULL;
 // Количество элементов в массиве
 int userCount = 0;
 
-class AI {
-private:
-  String api_key;
-
-public:
-  AI(String api_key) {
-    this->api_key = api_key;
-  }
-
-  String generate(String model_name, int max_tokens, float temperature = 0.8, String stop = "###") {
-    String response;
-    HTTPClient http;
-	String welcome;
-	#ifdef MGS_UV60
-      veml6075.poll();
-      float uva = veml6075.getUVA();
-      float uvb = veml6075.getUVB();
-      float uv_index = veml6075.getUVIndex();
-#endif
-#ifdef MGS_GUVA
-      float sensorVoltage;
-      float sensorValue;
-      float UV_index;
-      sensorValue = mcp3221.getVoltage();
-      sensorVoltage = 1000 * (sensorValue / 4096 * 5.0); // напряжение на АЦП
-      UV_index = 370 * sensorVoltage / 200000; // Индекс УФ (эмпирическое измерение)
-#endif
-#ifdef MGS_CO30
-      mySensor.measureAirQuality();
-#endif
-
-      float light = lightMeter.readLightLevel();
-
-      float t = bme280.readTemperature();
-      float h = bme280.readHumidity();
-      float p = bme280.readPressure() / 100.0F;
-
-#ifdef MGB_D1015
-      float adc0 = (float)ads.readADC_SingleEnded(0) * 6.144 * 16;
-      float adc1 = (float)ads.readADC_SingleEnded(1) * 6.144 * 16;
-      float t1 = (adc1 / 1000); //1023.0 * 5.0) - 0.5) * 100.0;
-      float h1 = map(adc0, air_value, water_value, moisture_0, moisture_100);
-#endif
-#ifdef MGB_P8
-      float adc0 = analogRead(SOIL_MOISTURE);
-      float adc1 = analogRead(SOIL_TEMPERATURE);
-      float t1 = ((adc1 / 4095.0 * 5.0) - 0.3) * 100.0; // АЦП разрядность (12) = 4095
-      float h1 = map(adc0, air_value, water_value, moisture_0, moisture_100);
-#endif
-      welcome = "Показания датчиков:\n";
-      welcome += "Темпиратура: " + String(t, 1) + " C\n";
-      welcome += "Влажность: " + String(h, 0) + " %\n";
-      welcome += "Давление: " + String(p, 0) + " hPa\n";
-      welcome += "Освещённость: " + String(light) + " Lx\n";
-      welcome += "Темпиратура почвы: " + String(t1, 0) + " C\n";
-      welcome += "Влажность: " + String(h1, 0) + " %\n";
-#ifdef MGS_UV60
-      welcome += "UVA: " + String(uva, 0) + " mkWt/cm2\n";
-      welcome += "UVB: " + String(uvb, 0) + " mkWt/cm2\n";
-      welcome += "UV Index: " + String(uv_index, 1) + " \n";
-#endif
-#ifdef MGS_GUVA
-      welcome += "Sensor voltage: " + String(sensorVoltage, 1) + " mV\n";
-      welcome += "UV Index: " + String(UV_index, 1) + " \n";
-#endif
-#ifdef MGS_CO30
-      welcome += "CO2: " + String(mySensor.CO2) + " ppm\n";
-      welcome += "TVOC: " + String(mySensor.TVOC) + " ppb\n";
-#endif
-	
-	String sensor_readings = welcome;
-// Подготовка данных для отправки
-StaticJsonDocument<200> doc;
-doc["api_key"] = api_key;
-JsonObject data = doc.createNestedObject("data");
-data["model_name"] = model_name;
-data["max_tokens"] = max_tokens;
-data["temperature"] = temperature;
-data["stop"] = stop;
-JsonObject prompt = data.createNestedObject("prompt");
-prompt["sensor_readings"] = sensor_readings;
-prompt["plant_name"] = plant_name;
-prompt["type"] = type;
-String requestBody;
-serializeJson(doc, requestBody);
-
-// Отправка POST-запроса
-const char* url = "http://api.alina-ai.ru:3443/alina_agronomist";
-http.begin(url);
-//http.begin("http://api.alina-ai.ru:3443/alina_agronomist");
-http.addHeader("Content-Type", "application/json");
-int httpResponseCode = http.POST(requestBody);
-
-    if (httpResponseCode == HTTP_CODE_OK) {
-      // Обработка успешного ответа
-      String payload = http.getString();
-
-      // Разбор JSON-ответа
-      DynamicJsonDocument jsonBuffer(1024);
-      DeserializationError error = deserializeJson(jsonBuffer, payload);
-
-      if (!error) {
-        JsonObject data = jsonBuffer.as<JsonObject>();
-        String status = data["status"].as<String>();
-
-        if (status.startsWith("error")) {
-          String error_message = data["error_message"].as<String>();
-          response = "API returned an error: " + error_message;
-        } else {
-          response = payload;
-        }
-      } else {
-        response = "Failed to parse JSON response";
-      }
-    } else {
-      // Обработка ошибки HTTP
-      response = "HTTP error: " + String(httpResponseCode);
-    }
-
-    http.end();
-    return response;
-  }
-};
+//class AI {
+//private:
+//  String api_key;
+//
+//public:
+//  AI(String api_key) {
+//    this->api_key = api_key;
+//  }
+//
+//  String generate(String model_name, int max_tokens, float temperature = 0.8, String stop = "###") {
+//    String response;
+//    HTTPClient http;
+//  String welcome;
+//  #ifdef MGS_UV60
+//      veml6075.poll();
+//      float uva = veml6075.getUVA();
+//      float uvb = veml6075.getUVB();
+//      float uv_index = veml6075.getUVIndex();
+//#endif
+//#ifdef MGS_GUVA
+//      float sensorVoltage;
+//      float sensorValue;
+//      float UV_index;
+//      sensorValue = mcp3221.getVoltage();
+//      sensorVoltage = 1000 * (sensorValue / 4096 * 5.0); // напряжение на АЦП
+//      UV_index = 370 * sensorVoltage / 200000; // Индекс УФ (эмпирическое измерение)
+//#endif
+//#ifdef MGS_CO30
+//      mySensor.measureAirQuality();
+//#endif
+//
+//      float light = lightMeter.readLightLevel();
+//
+//      float t = bme280.readTemperature();
+//      float h = bme280.readHumidity();
+//      float p = bme280.readPressure() / 100.0F;
+//
+//#ifdef MGB_D1015
+//      float adc0 = (float)ads.readADC_SingleEnded(0) * 6.144 * 16;
+//      float adc1 = (float)ads.readADC_SingleEnded(1) * 6.144 * 16;
+//      float t1 = (adc1 / 1000); //1023.0 * 5.0) - 0.5) * 100.0;
+//      float h1 = map(adc0, air_value, water_value, moisture_0, moisture_100);
+//#endif
+//#ifdef MGB_P8
+//      float adc0 = analogRead(SOIL_MOISTURE);
+//      float adc1 = analogRead(SOIL_TEMPERATURE);
+//      float t1 = ((adc1 / 4095.0 * 5.0) - 0.3) * 100.0; // АЦП разрядность (12) = 4095
+//      float h1 = map(adc0, air_value, water_value, moisture_0, moisture_100);
+//#endif
+//      welcome = "Показания датчиков:\n";
+//      welcome += "Темпиратура: " + String(t, 1) + " C\n";
+//      welcome += "Влажность: " + String(h, 0) + " %\n";
+//      welcome += "Давление: " + String(p, 0) + " hPa\n";
+//      welcome += "Освещённость: " + String(light) + " Lx\n";
+//      welcome += "Темпиратура почвы: " + String(t1, 0) + " C\n";
+//      welcome += "Влажность: " + String(h1, 0) + " %\n";
+//#ifdef MGS_UV60
+//      welcome += "UVA: " + String(uva, 0) + " mkWt/cm2\n";
+//      welcome += "UVB: " + String(uvb, 0) + " mkWt/cm2\n";
+//      welcome += "UV Index: " + String(uv_index, 1) + " \n";
+//#endif
+//#ifdef MGS_GUVA
+//      welcome += "Sensor voltage: " + String(sensorVoltage, 1) + " mV\n";
+//      welcome += "UV Index: " + String(UV_index, 1) + " \n";
+//#endif
+//#ifdef MGS_CO30
+//      welcome += "CO2: " + String(mySensor.CO2) + " ppm\n";
+//      welcome += "TVOC: " + String(mySensor.TVOC) + " ppb\n";
+//#endif
+//
+//  String sensor_readings = welcome;
+//// Подготовка данных для отправки
+//StaticJsonDocument<200> doc;
+//doc["api_key"] = api_key;
+//JsonObject data = doc.createNestedObject("data");
+//data["model_name"] = model_name;
+//data["max_tokens"] = max_tokens;
+//data["temperature"] = temperature;
+//data["stop"] = stop;
+//JsonObject prompt = data.createNestedObject("prompt");
+//prompt["sensor_readings"] = sensor_readings;
+//prompt["plant_name"] = plant_name;
+//prompt["type"] = type;
+//String requestBody;
+//serializeJson(doc, requestBody);
+//
+//// Отправка POST-запроса
+//const char* url = "http://api.alina-ai.ru:3443/alina_agronomist";
+//http.begin(url);
+////http.begin("http://api.alina-ai.ru:3443/alina_agronomist");
+//http.addHeader("Content-Type", "application/json");
+//int httpResponseCode = http.POST(requestBody);
+//
+//    if (httpResponseCode == HTTP_CODE_OK) {
+//      // Обработка успешного ответа
+//      String payload = http.getString();
+//
+//      // Разбор JSON-ответа
+//      DynamicJsonDocument jsonBuffer(1024);
+//      DeserializationError error = deserializeJson(jsonBuffer, payload);
+//
+//      if (!error) {
+//        JsonObject data = jsonBuffer.as<JsonObject>();
+//        String status = data["status"].as<String>();
+//
+//        if (status.startsWith("error")) {
+//          String error_message = data["error_message"].as<String>();
+//          response = "API returned an error: " + error_message;
+//        } else {
+//          response = payload;
+//        }
+//      } else {
+//        response = "Failed to parse JSON response";
+//      }
+//    } else {
+//      // Обработка ошибки HTTP
+//      response = "HTTP error: " + String(httpResponseCode);
+//    }
+//
+//    http.end();
+//    return response;
+//  }
+//};
 
 // Функция для добавления user_id в массив
 void addUser(int userId) {
@@ -310,16 +310,16 @@ void setup()
   ads.begin();    // включем АЦП
 #endif
 }
-bool alina_ai(){
-  AI ai(api_key);
-  String model_name = "alina_ai_agronomist_v1";
-  String prompt = prompt;
-  int max_tokens = 2000;
-  String generatedText = ai.generate(model_name, max_tokens); // убедитесь, что переменная 'ai' объявлена и инициализирована в нужном месте кода
-  Serial.println("Generated Text:");
-  Serial.println(generatedText);
-  return generatedText;
-}
+//bool alina_ai(){
+//  AI ai(api_key);
+//  String model_name = "alina_ai_agronomist_v1";
+//  String prompt = prompt;
+//  int max_tokens = 2000;
+//  String generatedText = ai.generate(model_name, max_tokens); // убедитесь, что переменная 'ai' объявлена и инициализирована в нужном месте кода
+//  Serial.println("Generated Text:");
+//  Serial.println(generatedText);
+//  return generatedText;
+//}
 void clearUsers() {
     String message = "Для продолжения работы вам необходимо авторизоваться снова. Пароль уточните у @phoenix0757";
     for (int i = 0; i < userCount; i++) {
@@ -594,7 +594,7 @@ void handleNewMessages(int numNewMessages)
       bot.sendMessage(chat_id, "Влажность и так критически большая, я не могу выполнить вашу команду по соображениям безопасности", "");
     }
   }
-	
+  
     if ((text == "/pumpoff") || (text == "pumpoff"))
     {
       digitalWrite(pump, LOW);
@@ -702,6 +702,7 @@ void handleNewMessages(int numNewMessages)
    {
     String commandPrefix = "/new_pass ";
     String new_pass = text.substring(commandPrefix.length());
+    //
     password = new_pass;
     String message = "Cупер, теперь пароль на бота: " + new_pass;
     bot.sendMessage(chat_id, message, "");
@@ -717,11 +718,11 @@ void handleNewMessages(int numNewMessages)
       removeUser(chat_id.toInt());
       bot.sendMessage(chat_id, "Вы успешно вышли из своего аккаунта", "");
     }
-	if (text == "/alina_ai"){
-		String mess = String(alina_ai()).c_str(); 
-		bot.sendMessage(String(chat_id), mess, "");
-	}
-	}else{
+  if (text == "/alina_ai"){
+    String mess = "данная функция недоступна, мы не успели её реализовать";//String(alina_ai()).c_str();
+    bot.sendMessage(String(chat_id), mess, "");
+  }
+  }else{
     bot.sendMessage(String(chat_id), "Вы не авторизованы, вам доступны лишь некоторые команды, для получения доступа ко всему функционалу авторизуйтесь \n(как это сделать вам расскажет @phoenix0757)", "");
   }
 }
